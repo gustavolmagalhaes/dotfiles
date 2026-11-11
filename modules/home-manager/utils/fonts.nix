@@ -1,6 +1,6 @@
 {config, pkgs, ...}:
 {
-  home.manager = with pkgs; [
+  home.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
   ];
 }
