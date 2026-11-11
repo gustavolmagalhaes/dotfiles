@@ -1,22 +1,39 @@
 # Host configuration for ace
-{
-  profiles,
-  ...
-}:
+{ profiles, ... }:
 {
   imports = with profiles; [
-    graphical.niri
-    graphical.browsers
-    graphical.terminals
-    graphical.apps
+    # Desktop environment
+    graphical.niri      # pulls ghostty, fuzzel, noctalia automatically
+
+    # Browsers
+    graphical.zen
+
+    # Extra graphical tools
+    graphical.nwg-displays
+    graphical.seahorse
+    graphical.alacritty
+
+    # Shell
     shell.essential
+
+    # Development
     dev.ist
+
+    # Virtualisation
     virtualisation.vm
   ];
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  # Audio
+  services.pipewire.enable = true;
+  hardware.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+  services.pipewire.alsa.enable = true;
+  services.pipewire.alsa.support32Bit = true;
+  services.pipewire.pulse.enable = true;
 
   # Networking
   networking.networkmanager.enable = true;

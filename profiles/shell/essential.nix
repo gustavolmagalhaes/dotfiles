@@ -1,12 +1,7 @@
-# Essential Shell & CLI Profile
+# Essential shell & CLI tools
+# Imported by hosts that want a full shell environment
 { pkgs, ... }:
 {
-  modules.shell = {
-    zsh.enable = true;
-    bash.enable = true;
-    git.enable = true;
-  };
-
   environment.systemPackages = with pkgs; [
     fastfetch
     nnn

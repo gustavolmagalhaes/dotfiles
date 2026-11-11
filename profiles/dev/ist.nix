@@ -1,5 +1,8 @@
-# IST Development Profile
-{ ... }:
+# IST development profile
+{ pkgs, ... }:
 {
-  modules.dev.ist.enable = true;
+  environment.systemPackages = with pkgs; [
+    swi-prolog
+    scryer-prolog
+  ];
 }

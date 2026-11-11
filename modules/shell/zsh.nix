@@ -1,100 +1,80 @@
+# Zsh shell with starship prompt and zoxide
+{ ... }:
 {
-  config,
-  lib,
-  ...
-}:
-let
-  inherit (lib) mkEnableOption mkIf;
-  cfg = config.modules.shell.zsh;
-in
-{
-  options.modules.shell.zsh.enable = mkEnableOption "Zsh Shell";
+  programs.zsh.enable = true;
 
-  config = mkIf cfg.enable {
-    programs.zsh.enable = true;
+  hm.programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
 
-    hm.programs.zsh = {
+    oh-my-zsh = {
       enable = true;
-      enableCompletion = true;
-      autosuggestion.enable = true;
-      syntaxHighlighting.enable = true;
-
-      oh-my-zsh = {
-        enable = true;
-        plugins = [
-          "git"
-          "sudo"
-        ];
-      };
-
-      history = {
-        size = 10000;
-        path = "$HOME/.zsh_history";
-      };
+      plugins = [ "git" "sudo" ];
     };
 
-    hm.programs.starship = {
-      enable = true;
-      enableZshIntegration = true;
-      settings = {
-        add_newline = true;
-        format = "$directory$git_branch$git_status$cmd_duration$line_break$character";
+    history = {
+      size = 10000;
+      path = "$HOME/.zsh_history";
+    };
+  };
 
-        character = {
-          success_symbol = "[❯](bold green)";
-          error_symbol = "[❯](bold red)";
-        };
+  hm.programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = {
+      add_newline = true;
+      format = "$directory$git_branch$git_status$cmd_duration$line_break$character";
 
-        package = {
-          disabled = true;
-        };
+      character = {
+        success_symbol = "[❯](bold green)";
+        error_symbol = "[❯](bold red)";
+      };
 
-        git_branch = {
-          symbol = " ";
-          format = "[$symbol$branch]($style) ";
-        };
+      package.disabled = true;
 
-        git_commit = {
-          tag_symbol = " ";
-        };
+      git_branch = {
+        symbol = " ";
+        format = "[$symbol$branch]($style) ";
+      };
 
-        git_state = {
-          format = "[\($state( $progress_current of $progress_total)\)]($style) ";
-        };
+      git_commit.tag_symbol = " ";
 
-        git_status = {
-          format = "([$all_status$ahead_behind]($style) )";
-          style = "bold red";
-          conflicted = "conflicted ";
-          ahead = "⇡\($count\) ";
-          behind = "⇣\($count\) ";
-          diverged = "⇕ ";
-          up_to_date = "✓ ";
-          untracked = "untracked ";
-          stashed = "stashed ";
-          modified = "modified ";
-          staged = "staged ";
-          renamed = "renamed ";
-          deleted = "deleted ";
-        };
+      git_state.format = "[\\($state( $progress_current of $progress_total)\\)]($style) ";
 
-        hostname = {
-          ssh_only = true;
-          format = "[$hostname](bold blue) ";
-          disabled = false;
-        };
+      git_status = {
+        format = "([$all_status$ahead_behind]($style) )";
+        style = "bold red";
+        conflicted = "conflicted ";
+        ahead = "⇡\\($count\\) ";
+        behind = "⇣\\($count\\) ";
+        diverged = "⇕ ";
+        up_to_date = "✓ ";
+        untracked = "untracked ";
+        stashed = "stashed ";
+        modified = "modified ";
+        staged = "staged ";
+        renamed = "renamed ";
+        deleted = "deleted ";
+      };
 
-        cmd_duration = {
-          min_time = 10000;
-          format = " took [$duration](bold yellow)";
-        };
+      hostname = {
+        ssh_only = true;
+        format = "[$hostname](bold blue) ";
+        disabled = false;
+      };
+
+      cmd_duration = {
+        min_time = 10000;
+        format = " took [$duration](bold yellow)";
       };
     };
+  };
 
-    hm.programs.zoxide = {
-      enable = true;
-      enableZshIntegration = true;
-      options = [ "--cmd cd" ];
-    };
+  hm.programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+    options = [ "--cmd cd" ];
   };
 }
