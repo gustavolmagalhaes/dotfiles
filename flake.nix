@@ -1,8 +1,13 @@
 {
-  description = "A template that shows all standard flake outputs";
+  description = "NixOS configuration with modules and profiles";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+
+    home-manager = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
@@ -12,14 +17,8 @@
       };
     };
 
-    home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     noctalia = {
       url = "github:noctalia-dev/noctalia/cachix";
-      # inputs.nixpkgs.follows = "nixpkgs"; # this line is optional, prevents downloading two versions of nixpkgs but disables cache
     };
   };
 
@@ -32,22 +31,64 @@
     ];
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, ... }: {
-    nixosConfigurations.ace = nixpkgs.lib.nixosSystem {
-      specialArgs = { inherit inputs; };
+  outputs =
+    inputs@{ ... }:
+    let
+      inherit (lib.my)
+        mkHosts
+        mkOverlays
+        mkPkgs
+        mkProfiles
+        ;
+
+      user = "gus";
+      userFullName = "Gustavo Magalhães";
       system = "x86_64-linux";
-      modules = [
-       	./hosts/ace
 
-       	home-manager.nixosModules.home-manager
-       	{
-       	  home-manager.useGlobalPkgs = true;
-       	  home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = {inherit inputs;};
+      extraArgs = {
+        inherit
+          user
+          userFullName
+          ;
+        configDir = ./config;
+      };
 
-       	  home-manager.users.gus = import ./home/gus.nix;
-        }
-      ];
+      lib = inputs.nixpkgs.lib.extend (
+        self: _super:
+        import ./lib (
+          {
+            inherit
+              inputs
+              nixosConfigurations
+              profiles
+              pkgs
+              ;
+            lib = self;
+          }
+          // extraArgs
+        )
+      );
+
+      overlays = mkOverlays ./overlays;
+      pkgs = mkPkgs system overlays;
+
+      nixosConfigurations = mkHosts ./hosts {
+        inherit extraArgs overlays;
+        extraModules = [
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "backup";
+              extraSpecialArgs = { inherit inputs; } // extraArgs;
+            };
+          }
+        ];
+      };
+      profiles = mkProfiles ./profiles;
+    in
+    {
+      inherit nixosConfigurations lib overlays;
     };
-  };
 }
