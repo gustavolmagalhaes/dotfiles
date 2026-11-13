@@ -1,39 +1,46 @@
 # Host configuration for ace
-{ profiles, ... }:
+{ profiles, inputs, ... }:
 {
+
   imports = with profiles; [
+    laptop
+
+
+
     # Desktop environment
-    graphical.niri      # pulls ghostty, fuzzel, noctalia automatically
+    # graphical.niri      # pulls ghostty, fuzzel, noctalia automatically
 
     # Browsers
-    graphical.zen
+    # graphical.zen
 
     # Extra graphical tools
-    graphical.nwg-displays
-    graphical.seahorse
+    # graphical.nwg-displays
+    # graphical.seahorse
     graphical.alacritty
 
     # Shell
     shell.essential
 
     # Development
-    dev.ist
-
-    # Virtualisation
-    virtualisation.vm
   ];
 
   # Bootloader
+  #
+  boot.loader = {
+    efi.canTouchEfiVariables = true;
+  }
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Audio
   services.pipewire.enable = true;
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire.alsa.enable = true;
   services.pipewire.alsa.support32Bit = true;
   services.pipewire.pulse.enable = true;
+
+  services.gvfs.enable = true;
 
   # Networking
   networking.networkmanager.enable = true;
@@ -59,6 +66,38 @@
     variant = "";
   };
   console.keyMap = "pt-latin1";
+
+  # Monitors
+  my.config = {
+    security = {
+      ir_camera_path = "/dev/video2";
+    };
+
+    graphical.monitors = [
+      {
+        name = "eDP-1"; # 1920x1200
+        primary = true;
+        position = {
+          x = 0;
+          y = 0;
+        };
+      }
+      {
+        name = "HDMI-A-1";
+        position = {
+          x = 1536;
+          y = 0;
+        };
+      }
+    ];
+  };
+
+#   age.identityPaths = ["/home/gus/.ssh/id_ed25519"];
+#
+#   age.secrets.baikal_password = {
+#     file = ../../secrets/baikal_password.age; # Adjust path to your secrets directory
+#     owner = "gus";
+#   };
 
   system.stateVersion = "26.05";
 }

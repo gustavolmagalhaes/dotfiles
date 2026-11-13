@@ -15,7 +15,10 @@
     graphical.zen
     graphical.fonts
 
+    graphical.cliphist
+
     graphical.waybar
+    graphical.nautilus
   ];
 
   programs.niri.enable = true;
@@ -24,6 +27,16 @@
   environment.systemPackages = with pkgs; [
     xwayland-satellite
   ];
+
+  hm.dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      # Set dark mode on apps that read dconf
+      "color-scheme" = "prefer-dark";
+    };
+  };
+
+  services.gnome.gnome-keyring.enable = true;
+  hm.services.gnome-keyring.enable = true;
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";

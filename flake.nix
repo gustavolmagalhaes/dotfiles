@@ -4,6 +4,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,8 +19,28 @@
       };
     };
 
-    noctalia = {
-      url = "github:noctalia-dev/noctalia/cachix";
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # noctalia = {
+    #   url = "github:noctalia-dev/noctalia/cachix";
+    # };
+
+    agenix = {
+      url = "github:ryantm/agenix/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    gaze = {
+      url = "github:GunduLabs/gaze/v0.5.1";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
 
@@ -39,16 +61,19 @@
         mkOverlays
         mkPkgs
         mkProfiles
+        mkSecrets
         ;
 
       user = "gus";
       userFullName = "Gustavo Magalhães";
       system = "x86_64-linux";
 
+      # I can put extra data here
       extraArgs = {
         inherit
           user
           userFullName
+          secrets
           ;
         configDir = ./config;
       };
@@ -62,6 +87,7 @@
               nixosConfigurations
               profiles
               pkgs
+              secrets
               ;
             lib = self;
           }
@@ -69,7 +95,25 @@
         )
       );
 
-      overlays = mkOverlays ./overlays;
+      extraPackages = { system, ... }:{
+        agenix = inputs.agenix.packages.${system}.default;
+        spicetify = inputs.spicetify-nix.legacyPackages.${system};
+        gaze = inputs.gaze.packages.${system}.default (old: {
+          buildInputs = (old.buildInputs or []) ++ [
+            inputs.nixpkgs.legacyPackages.${system}.zstd
+          ];
+        });
+        unstable = import inputs.nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      };
+
+      overlays = (mkOverlays ./overlays) // {
+        extraPkgs = _self: _super: (extraPackages { system = system; });
+      } // {
+
+      };
       pkgs = mkPkgs system overlays;
 
       nixosConfigurations = mkHosts ./hosts {
@@ -84,9 +128,11 @@
               extraSpecialArgs = { inherit inputs; } // extraArgs;
             };
           }
+          inputs.lanzaboote.nixosModules.lanzaboote
         ];
       };
       profiles = mkProfiles ./profiles;
+      secrets = mkSecrets ./secrets;
     in
     {
       inherit nixosConfigurations lib overlays;

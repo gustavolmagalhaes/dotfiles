@@ -6,7 +6,51 @@
   ...
 }@args:
 let
-  inherit (lib.my) listModulesRecursive' rakeLeaves;
+  inherit (lib.my) listModulesRecursive' rakeLeaves rakeLeavesWithSuffix;
+
+  mkModule = { config }: name: description: content@{ imports ? [], ...}: #smart fix attribute set pattern matching
+    let
+      path = lib.splitString "." name;
+      fullPath = [ "modules" ] ++ path;
+
+      # Fetches the boolean state of the switch
+      cfg = lib.getAttrFromPath fullPath config;
+
+      cleanContent = builtins.removeAttrs content [ "imports" ];
+    in {
+      inherit imports;
+
+      # Automatically builds the options.modules.hardware.bluetooth.enable tree
+      options = lib.setAttrByPath (fullPath ++ [ "enable" ]) (lib.mkEnableOption description);
+
+      # Automatically wraps your actual configuration in a mkIf block
+      config = lib.mkIf cfg.enable cleanContent;
+    };
+
+  mkUmbrella = { config }: dir: name: description:
+      let
+        # 1. Rake the directory, excluding default.nix
+        leaves = builtins.removeAttrs (rakeLeaves dir) [ "default" ];
+
+        # 2. Build the nested attribute paths
+        path = lib.splitString "." name;
+        fullPath = [ "modules" ] ++ path;
+        cfg = lib.getAttrFromPath fullPath config;
+      in {
+        # 3. Auto-import the child files
+        imports = builtins.attrValues leaves;
+
+        # 4. Generate the master switch option
+        options = lib.setAttrByPath (fullPath ++ [ "enable" ]) (lib.mkEnableOption description);
+
+        # 5. When enabled, cascade the mkDefault true state to all children
+        config = lib.mkIf cfg.enable (
+          lib.setAttrByPath fullPath (
+            lib.mapAttrs (n: v: { enable = lib.mkDefault true; }) leaves
+          )
+        );
+      };
+
 
   mkPkgs =
     system: overlays:
@@ -108,12 +152,20 @@ let
         lib.nameValuePair hostname (mkHost hostname cfg)
       ))
     ];
+
+  mkSecrets = secretsDir: rakeLeavesWithSuffix ".age" { } secretsDir;
+
+  mkTui = cmd: "ghostty +new-window -e ${lib.escapeShellArg cmd}";
 in
 {
   inherit
     mkPkgs
     mkOverlays
+    mkSecrets
     mkProfiles
     mkHosts
+    mkModule
+    mkUmbrella
+    mkTui
     ;
 }

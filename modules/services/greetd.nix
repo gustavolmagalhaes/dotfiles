@@ -7,16 +7,13 @@ in
 {
   services.greetd = {
     enable = true;
-    useTextGreeter = true;
+    # useTextGreeter = true;
     settings.default_session = {
       command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --sessions ${sessions} --theme ${theme}";
       user = "greeter";
     };
   };
 
-  services.gnome.gnome-keyring.enable = true;
   security.pam.services.greetd.enableGnomeKeyring = true;
   security.pam.services.login.enableGnomeKeyring = true;
-
-  hm.services.gnome-keyring.enable = true;
 }

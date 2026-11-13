@@ -1,0 +1,17 @@
+ - [ ] finish configuring full desktop environment
+ - [ ] Add safebooting
+ - [ ] mkModule allow extra options (afsc nginx)
+ - [x] setup lockscreen
+ - [ ] cachix publico cache de nixpkgs
+ - [ ] change behavior??
+ - [x] fix agenix and ikhal
+ - setup wireguard
+ - setup audio (speaker not working)
+ - [x] Change zen to be dark mode
+ - [ ] configure zen declaratively [](https://github.com/afsc19/nixos-config/blob/56b55615967e0728fd7f98f722e6fbcc3b151166/modules/graphical/browser/zen.nix)
+ - fix waybar
+ - restic??
+ - check config on modules
+ - fingerprint
+ - Check out diogotcorreia's lib.my.mkTui
+ - https://github.com/ang3lo-azevedo/dotfiles/blob/d3c4ae3579cc0a126ec32565de00fbba398a7ed3/modules/home-manager/utilities/auteticacaogovpt.nix

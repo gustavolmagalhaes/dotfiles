@@ -12,7 +12,6 @@
     wget
     git
     wl-clipboard
-    xclip
   ];
 
   environment.shellAliases = {
