@@ -1,11 +1,9 @@
-{ lib, config, pkgs, configDir, secrets, ...}:
+{ lib, config, pkgs, user, secrets, ...}:
 let
-  secrets_file = config.age.secrets.baikal_password.path;
-
-  readSecretVar = var: [
+  readSecretVar = secret_file: var: [
       "sh"
       "-c"
-      "source ${secrets_file} && echo \$${var}"
+      "source ${secret_file} && echo \$${var}"
     ];
 in lib.my.mkModule { inherit config; } "apps.utils.khal" "KHAL" {
   hm.programs = {
@@ -35,7 +33,10 @@ in lib.my.mkModule { inherit config; } "apps.utils.khal" "KHAL" {
     frequency = "*:0/15";
   };
 
-  # age.secrets.baikal_password.file = secrets.baikal_password;
+  age.secrets.baikal_password = {
+    file = secrets.baikal_password; # Adjust path to your secrets directory
+    owner = "${user}";
+  };
 
 
   # TODO: remove this from here
@@ -53,7 +54,7 @@ in lib.my.mkModule { inherit config; } "apps.utils.khal" "KHAL" {
           type = "caldav";
           url = "https://baikal.viper.lan/dav.php/";
           userName = "gustavo";
-          passwordCommand = readSecretVar "PASSWORD";
+          passwordCommand = readSecretVar config.age.secrets.baikal_password.path "PASSWORD";
         };
         vdirsyncer = {
           enable = true;
