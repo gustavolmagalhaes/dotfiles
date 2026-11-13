@@ -1,9 +1,9 @@
 # Host configuration for ace
-{ profiles, inputs, ... }:
+{ profiles, inputs, lib, ... }:
 {
 
-  imports = with profiles; [
-    laptop
+  imports = [
+    profiles.laptop
 
 
 
@@ -16,10 +16,10 @@
     # Extra graphical tools
     # graphical.nwg-displays
     # graphical.seahorse
-    graphical.alacritty
+    profiles.graphical.alacritty
 
     # Shell
-    shell.essential
+    profiles.shell.essential
 
     # Development
   ];
@@ -28,9 +28,17 @@
   #
   boot.loader = {
     efi.canTouchEfiVariables = true;
-  }
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+
+    systemd-boot.enable = lib.mkForce false;
+
+  };
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
+  };
+
+  # boot.loader.systemd-boot.enable = true;
+  # boot.loader.efi.canTouchEfiVariables = true;
 
   # Audio
   services.pipewire.enable = true;
